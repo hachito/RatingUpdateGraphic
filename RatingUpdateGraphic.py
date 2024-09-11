@@ -1,5 +1,5 @@
 import tkinter as tk
-# import winsound
+import winsound
 from urllib.request import urlopen
 
 start_num = 0
@@ -49,7 +49,7 @@ def updatePos():
         pos_text = tk.Label(root, text="you're did it", foreground="white", background="#c80404", font=("Arial", 20), width=1080, height=600)
         pos_text.place(anchor=tk.CENTER)
         pos_text.pack()
-        # winsound.PlaySound('right.wav', winsound.SND_FILENAME)
+        winsound.PlaySound('right.wav', winsound.SND_FILENAME)
     root.after(15000, findPlayer)
 
 
@@ -67,7 +67,7 @@ def updateNeg():
         neg_text = tk.Label(root, text="you're bad lol", foreground="white", background="#c80404", font=("Arial", 20), width=1080, height=600)
         neg_text.place(anchor=tk.CENTER)
         neg_text.pack()
-        # winsound.PlaySound('wrong.wav', winsound.SND_FILENAME)
+        winsound.PlaySound('wrong.wav', winsound.SND_FILENAME)
     root.after(15000, findPlayer)
 
 
