@@ -61,6 +61,8 @@ def updateNeg():
     if player_rank:
         player_rank.destroy()
         player_text.destroy()
+        player_rank = None
+        player_text = None
     if not neg_text:
         neg_text = tk.Label(root, text="you're bad lol", foreground="white", background="#c80404", font=("Arial", 20), width=1080, height=600)
         neg_text.place(anchor=tk.CENTER)
