@@ -1,9 +1,8 @@
 import tkinter as tk
 import winsound
-from urllib.request import urlopen
+from webread import getInfo
 
 start_num = 0
-player_name = ""
 root = tk.Tk()
 root.title("Live Rating Update Reaction")
 root.geometry("1080x600")
@@ -11,30 +10,26 @@ root.configure(background="#181414")
 link = tk.StringVar()
 player_text = None
 player_rank = None
-link_label = None
-link_entry = None
-ent_btn = None
 pos_text = None
 neg_text = None
 testbut = None
 
+def destruct(uilist):
+    for ui in range(len(uilist)):
+        uilist[ui].destroy()
+        uilist[ui] = None
+    return uilist
 
 def inputBox():
     global link
     global link_label
-    global link_entry
-    global ent_btn
-    if not link_label:
-        link_label = tk.Label(root, text="insert rating update link here:", foreground="#c80404", background="#181414")
-        link_entry = tk.Entry(root, textvariable=link, foreground="#c80404", background="#181414", font=("Arial", 20))
-        ent_btn = tk.Button(root, text="Enter", command=lambda: [findPlayer(), inputBox()])
-        link_label.pack()
-        link_entry.pack()
-        ent_btn.pack()
-    else:
-        link_label.destroy()
-        link_entry.destroy()
-        ent_btn.destroy()
+    link_label = tk.Label(root, text="insert rating update link here:", foreground="#c80404", background="#181414")
+    link_entry = tk.Entry(root, textvariable=link, foreground="#c80404", background="#181414", font=("Arial", 20))
+    ent_btn = tk.Button(root, text="Enter", command=lambda:[destruct(inputUI), findPlayer()])
+    inputUI = [link_label, link_entry, ent_btn]
+    link_label.pack()
+    link_entry.pack()
+    ent_btn.pack()
 
 
 def updatePos():
@@ -43,8 +38,10 @@ def updatePos():
     global player_rank
     # kill player rank and text
     if player_rank:
-        player_rank.master.destroy()
-        player_text.master.destroy()
+        player_rank.destroy()
+        player_text.destroy()
+        player_rank = None
+        player_text = None
     if not pos_text:
         pos_text = tk.Label(root, text="you're did it", foreground="white", background="#c80404", font=("Arial", 20), width=1080, height=600)
         pos_text.place(anchor=tk.CENTER)
@@ -55,48 +52,31 @@ def updatePos():
 
 def updateNeg():
     global neg_text
-    global player_text
-    global player_rank
+    neg = [neg_text]
     # kill player rank and text
-    if player_rank:
-        player_rank.destroy()
-        player_text.destroy()
     if not neg_text:
         neg_text = tk.Label(root, text="you're bad lol", foreground="white", background="#c80404", font=("Arial", 20), width=1080, height=600)
         neg_text.place(anchor=tk.CENTER)
         neg_text.pack()
         winsound.PlaySound('wrong.wav', winsound.SND_FILENAME)
-    root.after(15000, findPlayer)
+    root.after(15000, lambda:[destruct(neg),findPlayer()])
 
 
 def findPlayer():
-    global start_num
-    global player_name
     global player_text
     global player_rank
     global link
     global neg_text
+    global link_label
     global pos_text
     global testbut
-    # opens the profile page of the player
-    profile_url = link.get()
-    profile_page = urlopen(profile_url)
+    global start_num
 
-    # reads and converts the page to a really long string
-    html_bytes = profile_page.read()
-    html = html_bytes.decode("utf-8")
+    if link_label is None:
 
-    # splits the string into lists to find the player's name and rank
-    # splits the line that contains the player's name and rank
-    html_split = html.splitlines()
-    player_line = html_split[6]
-    player_split = player_line.split("\"")
-    # player is the name and rank
-    player = player_split[3]
-    shitfart = player.split(" - ")
-    # poop is the current rank
-    poop = shitfart[1]
-    player_name = shitfart[0]
+        print("thing works")
+
+    poop, player_name = getInfo(link.get())
 
     if not player_rank:
         player_rank = tk.Label(root, text=poop, foreground="#c80404", background="#181414", font=("Arial", 20), width=60, height=9)
@@ -105,18 +85,22 @@ def findPlayer():
         player_text.place(anchor=tk.CENTER)
         player_rank.pack()
         player_text.pack()
+        playerUI = [player_rank, player_text]
+
     else:
         if player_rank:
-            player_rank.configure(text=poop)
+           player_rank.configure(text=poop)
         if player_text:
             player_text.configure(text=player_name)
         if pos_text:
             pos_text.destroy()
+            pos_text = None
         if neg_text:
             neg_text.destroy()
+            neg_text = None
 
     if not testbut:
-        testbut = tk.Button(root, text="Enter", command=updateNeg)
+        testbut = tk.Button(root, text="Enter", command=lambda:[updateNeg(), destruct(playerUI)])
         testbut.pack()
 
     if start_num == 0:
@@ -124,7 +108,7 @@ def findPlayer():
         root.after(1000, findPlayer)
     if poop > start_num:
         print("good job")
-        root.after(1000, updatePos)
+        root.after(1000, lambda:[updatePos(), destruct(playerUI)])
         start_num = poop
     elif poop < start_num:
         print("youre ass")
