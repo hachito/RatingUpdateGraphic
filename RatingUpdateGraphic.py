@@ -43,7 +43,7 @@ def updatePos(label):
         label.player_rank = None
         label.player_text = None
     if not label.pos_text:
-        label.pos_text = tk.Label(root, text="you're did it", foreground="white", background="#c80404", font=("Arial", 20), width=1080, height=600)
+        label.pos_text = tk.Label(root, text="yippee", foreground="white", background="#c80404", font=("Arial", 20), width=1080, height=600)
         label.pos_text.place(anchor=tk.CENTER)
         label.pos_text.pack()
         winsound.PlaySound('right.wav', winsound.SND_FILENAME)
@@ -58,7 +58,7 @@ def updateNeg(label):
         label.player_rank = None
         label.player_text = None
     if not label.neg_text:
-        label.neg_text = tk.Label(root, text="you're bad lol", foreground="white", background="#c80404", font=("Arial", 20), width=1080, height=600)
+        label.neg_text = tk.Label(root, text="do better next time", foreground="white", background="#c80404", font=("Arial", 20), width=1080, height=600)
         label.neg_text.place(anchor=tk.CENTER)
         label.neg_text.pack()
         winsound.PlaySound('wrong.wav', winsound.SND_FILENAME)
@@ -102,11 +102,9 @@ def mainScreen(label):
         label.start_num = rank
         root.after(1000, lambda:[mainScreen(label)])
     if rank > label.start_num:
-        print("good job")
         root.after(1000, lambda:[updatePos(label)])
         label.start_num = rank
     elif rank < label.start_num:
-        print("youre ass")
         root.after(1000, lambda:[updateNeg(label)])
         label.start_num = rank
     else:
