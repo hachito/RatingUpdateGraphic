@@ -2,121 +2,117 @@ import tkinter as tk
 import winsound
 from webread import getInfo
 
-start_num = 0
+#creates window and geometry
 root = tk.Tk()
 root.title("Live Rating Update Reaction")
 root.geometry("1080x600")
 root.configure(background="#181414")
-link = tk.StringVar()
-player_text = None
-player_rank = None
-pos_text = None
-neg_text = None
-testbut = None
 
-def destruct(uilist):
-    for ui in range(len(uilist)):
-        uilist[ui].destroy()
-        uilist[ui] = None
-    return uilist
+class Labels():
+    link = tk.StringVar()
+    start_num = 0
+    player_text = None
+    player_rank = None
+    pos_text = None
+    neg_text = None
+    link_label = None
+    link_label = None
+    ent_btn = None
 
-def inputBox():
-    global link
-    global link_label
-    link_label = tk.Label(root, text="insert rating update link here:", foreground="#c80404", background="#181414")
-    link_entry = tk.Entry(root, textvariable=link, foreground="#c80404", background="#181414", font=("Arial", 20))
-    ent_btn = tk.Button(root, text="Enter", command=lambda:[destruct(inputUI), findPlayer()])
-    inputUI = [link_label, link_entry, ent_btn]
-    link_label.pack()
-    link_entry.pack()
-    ent_btn.pack()
+#Creates a display that asks for the user to input a player's RatingUpdate Link
+#If there is already an instance of this display, destroy it
+def inputBox(label):
+    if not label.link_label:
+        label.link_label = tk.Label(root, text="insert rating update link here:", foreground="#c80404", background="#181414")
+        label.link_entry = tk.Entry(root, textvariable=label.link, foreground="#c80404", background="#181414", font=("Arial", 20))
+        label.ent_btn = tk.Button(root, text="Enter", command=lambda:[mainScreen(label), inputBox(label)])
+        label.link_label.pack()
+        label.link_entry.pack()
+        label.ent_btn.pack()
+    else:
+        label.link_label.destroy()
+        label.link_entry.destroy()
+        label.ent_btn.destroy()
 
-
-def updatePos():
-    global pos_text
-    global player_text
-    global player_rank
-    # kill player rank and text
-    if player_rank:
-        player_rank.destroy()
-        player_text.destroy()
-        player_rank = None
-        player_text = None
-    if not pos_text:
-        pos_text = tk.Label(root, text="you're did it", foreground="white", background="#c80404", font=("Arial", 20), width=1080, height=600)
-        pos_text.place(anchor=tk.CENTER)
-        pos_text.pack()
+#Deletes the mainScreen ui and puts in a cheerful text with accompanying sounds
+#After a certain amount of time, perform the mainScreen function
+def updatePos(label):
+    if label.player_rank:
+        label.player_rank.destroy()
+        label.player_text.destroy()
+        label.player_rank = None
+        label.player_text = None
+    if not label.pos_text:
+        label.pos_text = tk.Label(root, text="you're did it", foreground="white", background="#c80404", font=("Arial", 20), width=1080, height=600)
+        label.pos_text.place(anchor=tk.CENTER)
+        label.pos_text.pack()
         winsound.PlaySound('right.wav', winsound.SND_FILENAME)
-    root.after(15000, findPlayer)
+    root.after(10000, lambda:[mainScreen(label)])
 
-
-def updateNeg():
-    global neg_text
-    neg = [neg_text]
-    # kill player rank and text
-    if not neg_text:
-        neg_text = tk.Label(root, text="you're bad lol", foreground="white", background="#c80404", font=("Arial", 20), width=1080, height=600)
-        neg_text.place(anchor=tk.CENTER)
-        neg_text.pack()
+#Deletes the mainScreen ui and puts in a negative text with accompanying sounds
+#After a certain amount of time, perform the mainScreen function
+def updateNeg(label):
+    if label.player_rank:
+        label.player_rank.destroy()
+        label.player_text.destroy()
+        label.player_rank = None
+        label.player_text = None
+    if not label.neg_text:
+        label.neg_text = tk.Label(root, text="you're bad lol", foreground="white", background="#c80404", font=("Arial", 20), width=1080, height=600)
+        label.neg_text.place(anchor=tk.CENTER)
+        label.neg_text.pack()
         winsound.PlaySound('wrong.wav', winsound.SND_FILENAME)
-    root.after(15000, lambda:[destruct(neg),findPlayer()])
+    root.after(10000, lambda:[mainScreen(label)])
 
+#Grabs the Player info and displays on the screen
+#After a certain amount of time, checks to see if the rank has changed, and either calls itself, updatePos, or updateNeg
+def mainScreen(label):
 
-def findPlayer():
-    global player_text
-    global player_rank
-    global link
-    global neg_text
-    global link_label
-    global pos_text
-    global testbut
-    global start_num
-
-    if link_label is None:
-
-        print("thing works")
-
-    poop, player_name = getInfo(link.get())
-
-    if not player_rank:
-        player_rank = tk.Label(root, text=poop, foreground="#c80404", background="#181414", font=("Arial", 20), width=60, height=9)
-        player_text = tk.Label(root, text=player_name, foreground="#c80404", background="#181414", font=("Arial", 20), width=60, height=9)
-        player_rank.place(anchor=tk.CENTER)
-        player_text.place(anchor=tk.CENTER)
-        player_rank.pack()
-        player_text.pack()
-        playerUI = [player_rank, player_text]
-
+    name, info = getInfo(label.link.get())
+    info_list = info.split(" ")
+    #grabs the rank
+    if "Happy" in info_list[0]:
+        rank = info_list[2]
     else:
-        if player_rank:
-           player_rank.configure(text=poop)
-        if player_text:
-            player_text.configure(text=player_name)
-        if pos_text:
-            pos_text.destroy()
-            pos_text = None
-        if neg_text:
-            neg_text.destroy()
-            neg_text = None
+        rank = info_list[1]
 
-    if not testbut:
-        testbut = tk.Button(root, text="Enter", command=lambda:[updateNeg(), destruct(playerUI)])
-        testbut.pack()
+    #Creates the player labels if no previous instance is found
+    if not label.player_rank:
+        label.player_text = tk.Label(root, text=name, foreground="#c80404", background="#181414", font=("Arial", 20), width=60, height=9)
+        label.player_rank = tk.Label(root, text=info, foreground="#c80404", background="#181414", font=("Arial", 20), width=60, height=9)
+        label.player_rank.place(anchor=tk.CENTER)
+        label.player_text.place(anchor=tk.CENTER)
+        label.player_rank.pack()
+        label.player_text.pack()
 
-    if start_num == 0:
-        start_num = poop
-        root.after(1000, findPlayer)
-    if poop > start_num:
+    #If an instance is found, renames and updates the info, and kills the pos or neg labels.
+    else:
+        if label.player_rank:
+           label.player_rank.configure(text=info)
+        if label.player_text:
+            label.player_text.configure(text=name)
+        if label.pos_text:
+            label.pos_text.destroy()
+            label.pos_text = None
+        if label.neg_text:
+            label.neg_text.destroy()
+            label.neg_text = None
+
+    if label.start_num == 0:
+        label.start_num = rank
+        root.after(1000, lambda:[mainScreen(label)])
+    if rank > label.start_num:
         print("good job")
-        root.after(1000, lambda:[updatePos(), destruct(playerUI)])
-        start_num = poop
-    elif poop < start_num:
+        root.after(1000, lambda:[updatePos(label)])
+        label.start_num = rank
+    elif rank < label.start_num:
         print("youre ass")
-        root.after(1000, updateNeg)
-        start_num = poop
+        root.after(1000, lambda:[updateNeg(label)])
+        label.start_num = rank
     else:
-        start_num = poop
-        root.after(10000, findPlayer)
+        label.start_num = rank
+        root.after(10000, lambda:[mainScreen(label)])
 
-inputBox()
+label = Labels()
+inputBox(label)
 root.mainloop()
